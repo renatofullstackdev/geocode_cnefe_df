@@ -1,0 +1,430 @@
+{
+  "noise_prefixes": [
+    "EDF"
+  ],
+  "noise_phrases": [
+    "SEM NUMERO",
+    "S N",
+    "S/N"
+  ],
+  "connectors": [
+    "E",
+    "A",
+    "AO"
+  ],
+  "stopwords": [
+    "DF",
+    "DISTRITO",
+    "FEDERAL",
+    "BRASIL",
+    "BRASILIA",
+    "ENDERECO",
+    "CEP",
+    "DE",
+    "DA",
+    "DO",
+    "DAS",
+    "DOS",
+    "EM",
+    "NO",
+    "NA",
+    "NOS",
+    "NAS"
+  ],
+  "component_types": {
+    "QUADRA": {
+      "aliases": [
+        "QUADRA",
+        "QUADRAS",
+        "QD",
+        "QDA",
+        "Q"
+      ],
+      "category": "location",
+      "weight": 1.35,
+      "scope_preference": "external"
+    },
+    "CONJUNTO": {
+      "aliases": [
+        "CONJUNTO",
+        "CONJ",
+        "CJTO",
+        "CJ"
+      ],
+      "category": "location",
+      "weight": 1.25,
+      "scope_preference": "external"
+    },
+    "LOTE": {
+      "aliases": [
+        "LOTE",
+        "LOTES",
+        "LT"
+      ],
+      "category": "premise",
+      "weight": 1.55,
+      "scope_preference": "any"
+    },
+    "CASA": {
+      "aliases": [
+        "CASA",
+        "CASAS",
+        "CS"
+      ],
+      "category": "premise",
+      "weight": 1.55,
+      "scope_preference": "internal"
+    },
+    "BLOCO": {
+      "aliases": [
+        "BLOCO",
+        "BLOCOS",
+        "BLCO",
+        "BL"
+      ],
+      "category": "building",
+      "weight": 1.2,
+      "scope_preference": "any"
+    },
+    "APARTAMENTO": {
+      "aliases": [
+        "APARTAMENTO",
+        "APARTAMENTOS",
+        "APTO",
+        "APT",
+        "AP"
+      ],
+      "category": "unit",
+      "weight": 1.5,
+      "scope_preference": "internal"
+    },
+    "SALA": {
+      "aliases": [
+        "SALA",
+        "SALAS",
+        "SL"
+      ],
+      "category": "unit",
+      "weight": 1.4,
+      "scope_preference": "internal"
+    },
+    "LOJA": {
+      "aliases": [
+        "LOJA",
+        "LOJAS",
+        "LJ"
+      ],
+      "category": "unit",
+      "weight": 1.4,
+      "scope_preference": "internal"
+    },
+    "CHACARA": {
+      "aliases": [
+        "CHACARA",
+        "CHACARAS",
+        "CH"
+      ],
+      "category": "rural",
+      "weight": 1.45,
+      "scope_preference": "any"
+    },
+    "GLEBA": {
+      "aliases": [
+        "GLEBA",
+        "GLEBAS"
+      ],
+      "category": "rural",
+      "weight": 1.3,
+      "scope_preference": "any"
+    },
+    "KM": {
+      "aliases": [
+        "KM",
+        "QUILOMETRO"
+      ],
+      "category": "rural",
+      "weight": 1.25,
+      "scope_preference": "external"
+    },
+    "TRECHO": {
+      "aliases": [
+        "TRECHO",
+        "TR"
+      ],
+      "category": "location",
+      "weight": 1.1,
+      "scope_preference": "external"
+    },
+    "MODULO": {
+      "aliases": [
+        "MODULO",
+        "MOD"
+      ],
+      "category": "access",
+      "weight": 1.05,
+      "scope_preference": "any"
+    },
+    "TORRE": {
+      "aliases": [
+        "TORRE"
+      ],
+      "category": "building",
+      "weight": 1.1,
+      "scope_preference": "internal"
+    },
+    "ENTRADA": {
+      "aliases": [
+        "ENTRADA",
+        "ENT"
+      ],
+      "category": "access",
+      "weight": 0.9,
+      "scope_preference": "internal"
+    },
+    "PORTA": {
+      "aliases": [
+        "PORTA"
+      ],
+      "category": "access",
+      "weight": 0.9,
+      "scope_preference": "internal"
+    },
+    "ANDAR": {
+      "aliases": [
+        "ANDAR"
+      ],
+      "category": "access",
+      "weight": 0.9,
+      "scope_preference": "internal"
+    },
+    "PAVIMENTO": {
+      "aliases": [
+        "PAVIMENTO",
+        "PAV"
+      ],
+      "category": "access",
+      "weight": 0.9,
+      "scope_preference": "internal"
+    },
+    "COBERTURA": {
+      "aliases": [
+        "COBERTURA",
+        "COB"
+      ],
+      "category": "unit",
+      "weight": 1.1,
+      "scope_preference": "internal"
+    },
+    "NUMERO": {
+      "aliases": [
+        "NUMERO",
+        "NUM",
+        "NRO",
+        "NO"
+      ],
+      "category": "premise",
+      "weight": 1.35,
+      "scope_preference": "any"
+    },
+    "ASSENTAMENTO": {
+      "aliases": [
+        "ASSENTAMENTO",
+        "ASSENT"
+      ],
+      "category": "rural",
+      "weight": 1.2,
+      "scope_preference": "external"
+    },
+    "UNIDADE": {
+      "aliases": [
+        "UNIDADE",
+        "UN"
+      ],
+      "category": "unit",
+      "weight": 1.25,
+      "scope_preference": "internal"
+    },
+    "GALPAO": {
+      "aliases": [
+        "GALPAO"
+      ],
+      "category": "building",
+      "weight": 1.1,
+      "scope_preference": "any"
+    }
+  },
+  "qualifier_types": {
+    "POSITION": [
+      "FRENTE",
+      "FUNDOS",
+      "LADO",
+      "DIREITO",
+      "ESQUERDO"
+    ],
+    "LEVEL": [
+      "TERREO",
+      "SUBSOLO",
+      "SOBRADO"
+    ],
+    "OTHER": []
+  },
+  "road_types": [
+    "AVENIDA",
+    "AV",
+    "RUA",
+    "R",
+    "ESTRADA",
+    "RODOVIA",
+    "ALAMEDA",
+    "VIA",
+    "TRAVESSA",
+    "TV",
+    "PRACA",
+    "EIXO",
+    "VIELA",
+    "ACESSO",
+    "MARGINAL",
+    "W3"
+  ],
+  "coded_grid_prefixes": [
+    "QI",
+    "QE",
+    "QS",
+    "QR",
+    "QRS",
+    "QRI",
+    "QN",
+    "QNA",
+    "QNB",
+    "QNC",
+    "QND",
+    "QNE",
+    "QNF",
+    "QNG",
+    "QNH",
+    "QNI",
+    "QNJ",
+    "QNK",
+    "QNL",
+    "QNM",
+    "QNN",
+    "QNO",
+    "QNP",
+    "QNQ",
+    "QNR",
+    "QNS",
+    "QNT",
+    "QNU",
+    "QNV",
+    "QNW",
+    "QNX",
+    "QNY",
+    "QNZ",
+    "QT",
+    "SQN",
+    "SQS",
+    "SQNW",
+    "SQSW",
+    "CLN",
+    "CLS",
+    "CLNW",
+    "CLSW",
+    "CRN",
+    "CRS",
+    "SHCGN",
+    "SHCGS",
+    "SHCES",
+    "SHCE",
+    "SHCN",
+    "SHCS",
+    "SCLN",
+    "SCLS",
+    "SCLRN",
+    "SCRN",
+    "SCRS",
+    "QMSW",
+    "AOS",
+    "QC"
+  ],
+  "sector_codes": [
+    "SHIS",
+    "SHIN",
+    "SRES",
+    "SMPW",
+    "SMDB",
+    "SCN",
+    "SCS",
+    "SAN",
+    "SBN",
+    "SBS",
+    "SAS",
+    "SIA",
+    "SCIA",
+    "SIG",
+    "SOF",
+    "SAAN",
+    "SRTVN",
+    "SRTVS",
+    "SEPN",
+    "SEPS",
+    "SGAN",
+    "SGAS",
+    "SDN",
+    "SDS",
+    "SEN",
+    "SES",
+    "SAI",
+    "SAISO",
+    "SHTQ",
+    "SHTN",
+    "SHTS",
+    "SHJB",
+    "SHVP",
+    "SHRF",
+    "SHRFII",
+    "SHMS",
+    "SHSN",
+    "SHPS",
+    "SH",
+    "SHA",
+    "SGCV",
+    "SGAN",
+    "SCLRN",
+    "SHCGN"
+  ],
+  "multi_value_grid_prefixes": [
+    "SCRN",
+    "SCRS",
+    "SCLRN",
+    "SCLRS"
+  ],
+  "component_compatibility": {
+    "CASA": {
+      "LOTE": 0.72,
+      "NUMERO": 0.82
+    },
+    "LOTE": {
+      "CASA": 0.72,
+      "NUMERO": 0.82
+    },
+    "NUMERO": {
+      "CASA": 0.82,
+      "LOTE": 0.82
+    },
+    "UNIDADE": {
+      "APARTAMENTO": 0.82,
+      "SALA": 0.78,
+      "LOJA": 0.78,
+      "CASA": 0.68
+    },
+    "APARTAMENTO": {
+      "UNIDADE": 0.82
+    },
+    "SALA": {
+      "UNIDADE": 0.78
+    },
+    "LOJA": {
+      "UNIDADE": 0.78
+    }
+  }
+}
