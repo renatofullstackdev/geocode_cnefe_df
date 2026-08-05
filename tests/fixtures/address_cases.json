@@ -1,0 +1,57 @@
+[
+  {
+    "name": "sector-grid-components-and-cep",
+    "query": "SHIS QI 15 CONJUNTO 2 CASA 1 LAGO SUL 70075-900",
+    "cep": "70075900",
+    "locality": "LAGO SUL",
+    "sectors": [
+      "SHIS"
+    ],
+    "roads": [],
+    "components": [
+      [
+        "GRID",
+        "QI 15"
+      ],
+      [
+        "CONJUNTO",
+        "2"
+      ],
+      [
+        "CASA",
+        "1"
+      ]
+    ]
+  },
+  {
+    "name": "road-and-urban-components",
+    "query": "RUA 4 QUADRA 10 CONJUNTO A LOTE 2 BLOCO B AGUAS CLARAS",
+    "cep": null,
+    "locality": "AGUAS CLARAS",
+    "sectors": [],
+    "roads": [
+      [
+        "RUA",
+        "4"
+      ]
+    ],
+    "components": [
+      [
+        "QUADRA",
+        "10"
+      ],
+      [
+        "CONJUNTO",
+        "A"
+      ],
+      [
+        "LOTE",
+        "2"
+      ],
+      [
+        "BLOCO",
+        "B"
+      ]
+    ]
+  }
+]

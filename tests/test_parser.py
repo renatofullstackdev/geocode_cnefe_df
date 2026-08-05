@@ -1,8 +1,19 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
 from app.domain.locality import LocalityIndex
 from app.domain.text import (
     basic_normalize,
     canonical_value,
     normalize_cep,
+)
+
+ADDRESS_CASES = json.loads(
+    (Path(__file__).parent / "fixtures" / "address_cases.json").read_text(encoding="utf-8")
 )
 
 
@@ -47,3 +58,27 @@ def test_longest_locality_match():
 
     assert locality == "VICENTE PIRES TRECHO 3"
     assert len(indexes) == 4
+
+
+@pytest.mark.parametrize(
+    "case",
+    ADDRESS_CASES,
+    ids=lambda case: case["name"],
+)
+def test_parser_extracts_basic_structured_evidence(
+    parser,
+    case,
+):
+    parsed = parser.parse_query(case["query"])
+
+    assert parsed.cep == case["cep"]
+    assert parsed.locality == case["locality"]
+    assert list(parsed.sectors) == case["sectors"]
+
+    assert [(road.type, road.value) for road in parsed.roads] == [
+        tuple(expected) for expected in case["roads"]
+    ]
+
+    assert [(component.type, component.value) for component in parsed.components] == [
+        tuple(expected) for expected in case["components"]
+    ]
