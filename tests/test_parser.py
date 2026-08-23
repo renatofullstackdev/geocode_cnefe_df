@@ -82,3 +82,23 @@ def test_parser_extracts_basic_structured_evidence(
     assert [(component.type, component.value) for component in parsed.components] == [
         tuple(expected) for expected in case["components"]
     ]
+
+
+def test_parser_preserves_repeated_component_occurrences(parser):
+    parsed = parser.parse_query("QUADRA 10 LOTE 2 LOTE 4 AGUAS CLARAS")
+
+    lots = [component for component in parsed.components if component.type == "LOTE"]
+
+    assert [component.value for component in lots] == [
+        "2",
+        "4",
+    ]
+    assert [component.source for component in lots] == [
+        "query",
+        "query",
+    ]
+    assert [component.scope for component in lots] == [
+        "query",
+        "query",
+    ]
+    assert lots[0].position < lots[1].position

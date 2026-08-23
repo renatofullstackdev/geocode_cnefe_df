@@ -175,24 +175,24 @@ class AddressParser:
         consumed: set[int],
     ) -> list[AddressComponent]:
         components: list[AddressComponent] = []
-        captured_types: set[str] = set()
 
         for index in range(len(tokens) - 1):
             if index in locality_indexes:
                 continue
+
             prefix = tokens[index]
             value_token = tokens[index + 1]
+
             if (
                 prefix not in self.vocabulary.coded_grid_prefixes
                 or not VALUE_TOKEN_PATTERN.fullmatch(value_token)
-                or "GRID" in captured_types
             ):
                 continue
 
             components.append(
                 AddressComponent(
                     type="GRID",
-                    value=(f"{prefix} {canonical_value(value_token)}"),
+                    value=f"{prefix} {canonical_value(value_token)}",
                     raw_value=f"{prefix} {value_token}",
                     source="query",
                     scope="query",
@@ -200,12 +200,12 @@ class AddressParser:
                     category="location",
                 )
             )
-            captured_types.add("GRID")
             consumed.update({index, index + 1})
 
         for index, label in enumerate(tokens):
             canonical = self.vocabulary.alias_to_component.get(label)
-            if canonical not in self._CORE_COMPONENT_TYPES or canonical in captured_types:
+
+            if canonical not in self._CORE_COMPONENT_TYPES:
                 continue
 
             value_indexes = self._component_value_indexes(
@@ -214,11 +214,13 @@ class AddressParser:
                 locality_indexes,
                 boundary_tokens,
             )
+
             if not value_indexes:
                 continue
 
             raw_value = " ".join(tokens[value_index] for value_index in value_indexes)
             spec = self.vocabulary.components[canonical]
+
             components.append(
                 AddressComponent(
                     type=canonical,
@@ -230,7 +232,7 @@ class AddressParser:
                     category=spec.category,
                 )
             )
-            captured_types.add(canonical)
+
             consumed.add(index)
             consumed.update(value_indexes)
 
@@ -279,10 +281,9 @@ class AddressParser:
         consumed: set[int],
     ) -> list[RoadComponent]:
         roads: list[RoadComponent] = []
-        captured_types: set[str] = set()
 
         for index, token in enumerate(tokens):
-            if token not in self.vocabulary.road_types or token in captured_types:
+            if token not in self.vocabulary.road_types:
                 continue
 
             value_indexes = self._road_value_indexes(
@@ -291,6 +292,7 @@ class AddressParser:
                 boundary_tokens,
                 locality_indexes,
             )
+
             if not value_indexes:
                 continue
 
@@ -303,7 +305,7 @@ class AddressParser:
                     position=index,
                 )
             )
-            captured_types.add(token)
+
             consumed.add(index)
             consumed.update(value_indexes)
 

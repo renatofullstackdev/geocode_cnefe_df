@@ -53,5 +53,49 @@
         "B"
       ]
     ]
-  }
+  },
+  {
+    "name": "repeated-components-are-preserved",
+    "query": "QUADRA 10 CONJUNTO A LOTE 2 LOTE 4 AGUAS CLARAS",
+    "cep": null,
+    "locality": "AGUAS CLARAS",
+    "sectors": [],
+    "roads": [],
+    "components": [
+      [
+        "QUADRA",
+        "10"
+      ],
+      [
+        "CONJUNTO",
+        "A"
+      ],
+      [
+        "LOTE",
+        "2"
+      ],
+      [
+        "LOTE",
+        "4"
+      ]
+    ]
+  },
+  {
+    "name": "repeated-road-types-are-preserved",
+    "query": "RUA 4 RUA 5 AGUAS CLARAS",
+    "cep": null,
+    "locality": "AGUAS CLARAS",
+    "sectors": [],
+    "roads": [
+      [
+        "RUA",
+        "4"
+      ],
+      [
+        "RUA",
+        "5"
+      ]
+    ],
+    "components": []
+  }  
 ]
