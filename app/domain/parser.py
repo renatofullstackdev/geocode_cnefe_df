@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from .addressing import AddressComponent, ParsedAddress, RoadComponent
+from .addressing import AddressComponent, AddressQualifier, ParsedAddress, RoadComponent
 from .locality import LocalityIndex
 from .text import (
     CEP_PATTERN,
@@ -22,6 +22,13 @@ class AddressParser:
             "LOTE",
             "CASA",
             "BLOCO",
+        }
+    )
+
+    _SECONDARY_COMPONENT_CATEGORIES = frozenset(
+        {
+            "unit",
+            "access",
         }
     )
 
@@ -86,6 +93,14 @@ class AddressParser:
             boundary_tokens,
             consumed,
         )
+
+        qualifiers = self._extract_qualifiers(
+            tokens,
+            locality_indexes,
+            boundary_tokens,
+            consumed,
+        )
+
         roads = self._extract_roads(
             tokens,
             locality_indexes,
@@ -145,7 +160,12 @@ class AddressParser:
             sectors=sectors,
             roads=tuple(sorted(roads, key=lambda item: item.position)),
             components=tuple(sorted(components, key=lambda item: item.position)),
-            qualifiers=(),
+            qualifiers=tuple(
+                sorted(
+                    qualifiers,
+                    key=lambda item: item.position,
+                )
+            ),
             residual_tokens=residual_tokens,
             retrieval_tokens=retrieval_tokens,
             anchor=anchor,
@@ -205,7 +225,15 @@ class AddressParser:
         for index, label in enumerate(tokens):
             canonical = self.vocabulary.alias_to_component.get(label)
 
-            if canonical not in self._CORE_COMPONENT_TYPES:
+            if canonical is None:
+                continue
+
+            spec = self.vocabulary.components[canonical]
+
+            if (
+                canonical not in self._CORE_COMPONENT_TYPES
+                and spec.category not in self._SECONDARY_COMPONENT_CATEGORIES
+            ):
                 continue
 
             value_indexes = self._component_value_indexes(
@@ -219,7 +247,6 @@ class AddressParser:
                 continue
 
             raw_value = " ".join(tokens[value_index] for value_index in value_indexes)
-            spec = self.vocabulary.components[canonical]
 
             components.append(
                 AddressComponent(
@@ -272,6 +299,48 @@ class AddressParser:
                 break
 
         return indexes
+
+    def _extract_qualifiers(
+        self,
+        tokens: list[str],
+        locality_indexes: set[int],
+        boundary_tokens: set[str],
+        consumed: set[int],
+    ) -> list[AddressQualifier]:
+        qualifiers: list[AddressQualifier] = []
+
+        for index, token in enumerate(tokens):
+            category = self.vocabulary.qualifier_aliases.get(token)
+
+            if category is None:
+                continue
+
+            value = token
+
+            next_index = index + 1
+            if (
+                next_index < len(tokens)
+                and next_index not in consumed
+                and next_index not in locality_indexes
+            ):
+                next_token = tokens[next_index]
+
+                if VALUE_TOKEN_PATTERN.fullmatch(next_token) and next_token not in boundary_tokens:
+                    value = f"{token} {canonical_value(next_token)}"
+                    consumed.add(next_index)
+
+            qualifiers.append(
+                AddressQualifier(
+                    category=category,
+                    value=value,
+                    source="query",
+                    scope="query",
+                    position=index,
+                )
+            )
+            consumed.add(index)
+
+        return qualifiers
 
     def _extract_roads(
         self,

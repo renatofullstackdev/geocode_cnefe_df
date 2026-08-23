@@ -102,3 +102,52 @@ def test_parser_preserves_repeated_component_occurrences(parser):
         "query",
     ]
     assert lots[0].position < lots[1].position
+
+
+def test_parser_distinguishes_units_and_access_elements(parser):
+    parsed = parser.parse_query("LOTE 2 APARTAMENTO 101 ENTRADA B ANDAR 3 AGUAS CLARAS")
+
+    assert [
+        (
+            component.type,
+            component.value,
+            component.category,
+        )
+        for component in parsed.components
+    ] == [
+        ("LOTE", "2", "premise"),
+        ("APARTAMENTO", "101", "unit"),
+        ("ENTRADA", "B", "access"),
+        ("ANDAR", "3", "access"),
+    ]
+
+    assert [
+        (component.source, component.scope)
+        for component in parsed.components
+        if component.type in {"APARTAMENTO", "ENTRADA", "ANDAR"}
+    ] == [
+        ("query", "query"),
+        ("query", "query"),
+        ("query", "query"),
+    ]
+
+
+def test_parser_extracts_positional_qualifiers(parser):
+    parsed = parser.parse_query("LOTE 5 FUNDOS 2 TERREO AGUAS CLARAS")
+
+    assert [(qualifier.category, qualifier.value) for qualifier in parsed.qualifiers] == [
+        ("POSITION", "FUNDOS 2"),
+        ("LEVEL", "TERREO"),
+    ]
+
+    assert not any(
+        component.type == "NUMERO" and component.value == "2" for component in parsed.components
+    )
+
+    assert [
+        (qualifier.source, qualifier.scope)
+        for qualifier in parsed.qualifiers
+    ] == [
+        ("query", "query"),
+        ("query", "query"),
+    ]
