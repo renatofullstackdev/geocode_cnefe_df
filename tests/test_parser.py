@@ -144,10 +144,63 @@ def test_parser_extracts_positional_qualifiers(parser):
         component.type == "NUMERO" and component.value == "2" for component in parsed.components
     )
 
-    assert [
-        (qualifier.source, qualifier.scope)
-        for qualifier in parsed.qualifiers
-    ] == [
+    assert [(qualifier.source, qualifier.scope) for qualifier in parsed.qualifiers] == [
         ("query", "query"),
         ("query", "query"),
     ]
+
+
+def test_parser_supports_rural_address_components(parser):
+    parsed = parser.parse_query("RODOVIA DF 001 KM 13 CHACARA 26 TAGUATINGA")
+
+    assert {road.normalized for road in parsed.roads} >= {
+        "RODOVIA DF 001",
+    }
+
+    assert {
+        (component.type, component.value, component.category) for component in parsed.components
+    } >= {
+        ("KM", "13", "rural"),
+        ("CHACARA", "26", "rural"),
+    }
+
+
+def test_parser_supports_condominium_hierarchies(parser):
+    parsed = parser.parse_query(
+        "CONDOMINIO COOPERVILLE RUA 3 QUADRA 1 RUA INTERNA 3 QUADRA 3 LOTE 6"
+    )
+
+    assert [component.value for component in parsed.components if component.type == "QUADRA"] == [
+        "1",
+        "3",
+    ]
+
+    assert {road.normalized for road in parsed.roads} >= {
+        "RUA 3",
+        "RUA INTERNA 3",
+    }
+
+
+def test_parser_preserves_external_and_internal_record_scopes(parser):
+    parsed = parser.parse_record(
+        lograd_num=("EDF QUADRA 2 CONJUNTO 2 LOTE 6 BLOCO K, SN"),
+        complemento="APARTAMENTO 403",
+        locality="PARANOA PARQUE",
+        establishment=None,
+        cep="71587-302",
+    )
+
+    lot = next(component for component in parsed.components if component.type == "LOTE")
+    apartment = next(
+        component for component in parsed.components if component.type == "APARTAMENTO"
+    )
+
+    assert (lot.source, lot.scope) == (
+        "lograd_num",
+        "external",
+    )
+    assert (apartment.source, apartment.scope) == (
+        "complemento",
+        "internal",
+    )
+    assert parsed.cep == "71587302"

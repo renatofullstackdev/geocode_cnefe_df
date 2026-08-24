@@ -97,5 +97,35 @@
       ]
     ],
     "components": []
-  }  
+  },
+  {
+    "name": "rural-road-kilometer-and-farm",
+    "query": "RODOVIA DF 001 KM 13 CHACARA 26 TAGUATINGA",
+    "cep": null,
+    "locality": "TAGUATINGA",
+    "sectors": [],
+    "roads": [
+      ["RODOVIA", "DF 001"]
+    ],
+    "components": [
+      ["KM", "13"],
+      ["CHACARA", "26"]
+    ]
+  },
+  {
+    "name": "condominium-external-and-internal-hierarchy",
+    "query": "CONDOMINIO COOPERVILLE RUA 3 QUADRA 1 RUA INTERNA 3 QUADRA 3 LOTE 6",
+    "cep": null,
+    "locality": null,
+    "sectors": [],
+    "roads": [
+      ["RUA", "3"],
+      ["RUA", "INTERNA 3"]
+    ],
+    "components": [
+      ["QUADRA", "1"],
+      ["QUADRA", "3"],
+      ["LOTE", "6"]
+    ]
+  }    
 ]
