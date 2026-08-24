@@ -83,6 +83,11 @@ def test_parser_extracts_basic_structured_evidence(
         tuple(expected) for expected in case["components"]
     ]
 
+    if "qualifiers" in case:
+        assert [(qualifier.category, qualifier.value) for qualifier in parsed.qualifiers] == [
+            tuple(expected) for expected in case["qualifiers"]
+        ]
+
 
 def test_parser_preserves_repeated_component_occurrences(parser):
     parsed = parser.parse_query("QUADRA 10 LOTE 2 LOTE 4 AGUAS CLARAS")

@@ -127,5 +127,87 @@
       ["QUADRA", "3"],
       ["LOTE", "6"]
     ]
-  }    
+  },
+  {
+    "name": "compact-labels-are-expanded",
+    "query": "LOTE10AP102",
+    "cep": null,
+    "locality": null,
+    "sectors": [],
+    "roads": [],
+    "components": [
+      ["LOTE", "10"],
+      ["APARTAMENTO", "102"]
+    ]
+  },
+  {
+    "name": "multi-value-quadra-is-preserved",
+    "query": "QUADRAS 07 E 08 LOTE 19A",
+    "cep": null,
+    "locality": null,
+    "sectors": [],
+    "roads": [],
+    "components": [
+      ["QUADRA", "7 E 8"],
+      ["LOTE", "19A"]
+    ]
+  },
+  {
+    "name": "complete-urban-unit-hierarchy",
+    "query": "QUADRA 2 CONJUNTO 2 LOTE 6 BLOCO K APARTAMENTO 403",
+    "cep": null,
+    "locality": null,
+    "sectors": [],
+    "roads": [],
+    "components": [
+      ["QUADRA", "2"],
+      ["CONJUNTO", "2"],
+      ["LOTE", "6"],
+      ["BLOCO", "K"],
+      ["APARTAMENTO", "403"]
+    ]
+  },
+  {
+    "name": "postfix-kilometer-rural-address",
+    "query": "AVENIDA PONTE ALTA DE CIMA 65 KM CHACARA 3 CASA 1",
+    "cep": null,
+    "locality": null,
+    "sectors": [],
+    "roads": [
+      ["AVENIDA", "PONTE ALTA DE CIMA"]
+    ],
+    "components": [
+      ["KM", "65"],
+      ["CHACARA", "3"],
+      ["CASA", "1"]
+    ]
+  },
+  {
+    "name": "multi-value-compact-grid",
+    "query": "SCRN 712 713 BLOCO D APARTAMENTO 102",
+    "cep": null,
+    "locality": null,
+    "sectors": [],
+    "roads": [],
+    "components": [
+      ["GRID", "SCRN 712 713"],
+      ["BLOCO", "D"],
+      ["APARTAMENTO", "102"]
+    ]
+  },
+  {
+    "name": "multi-value-lot-with-qualifier",
+    "query": "LOTE 63 E 64 FUNDOS CASA 4",
+    "cep": null,
+    "locality": null,
+    "sectors": [],
+    "roads": [],
+    "components": [
+      ["LOTE", "63 E 64"],
+      ["CASA", "4"]
+    ],
+    "qualifiers": [
+      ["POSITION", "FUNDOS"]
+    ]
+  }      
 ]
