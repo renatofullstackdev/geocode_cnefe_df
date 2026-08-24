@@ -199,6 +199,30 @@ class AddressParser:
                 )
                 consumed.update(range(index, index + 1 + len(grid_value_tokens)))
 
+        # Some CNEFE records use postfix distance notation (for example, "65 KM").
+        for index in range(len(tokens) - 1):
+            if (
+                re.fullmatch(r"\d+(?:[A-Z])?", tokens[index])
+                and self.vocabulary.alias_to_component.get(tokens[index + 1]) == "KM"
+                and (
+                    index + 2 >= len(tokens)
+                    or not re.fullmatch(r"\d+(?:[A-Z])?", tokens[index + 2])
+                )
+            ):
+                spec = self.vocabulary.components["KM"]
+                components.append(
+                    AddressComponent(
+                        type="KM",
+                        value=canonical_value(tokens[index]),
+                        raw_value=tokens[index],
+                        source=source,
+                        scope=scope,
+                        position=index,
+                        category=spec.category,
+                    )
+                )
+                consumed.update({index, index + 1})
+
         boundary_tokens = (
             set(self.vocabulary.alias_to_component)
             | set(self.vocabulary.qualifier_aliases)
@@ -209,8 +233,13 @@ class AddressParser:
 
         for index, label in enumerate(tokens):
             canonical = self.vocabulary.alias_to_component.get(label)
+
             if canonical is None:
                 continue
+
+            if canonical == "KM" and index in consumed:
+                continue
+
             if (
                 canonical == "QUADRA"
                 and index + 1 < len(tokens)

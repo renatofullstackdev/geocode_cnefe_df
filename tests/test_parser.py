@@ -204,3 +204,19 @@ def test_parser_preserves_external_and_internal_record_scopes(parser):
         "internal",
     )
     assert parsed.cep == "71587302"
+
+
+def test_postfix_km_is_not_a_house_number(parser):
+    parsed = parser.parse_query("AVENIDA PONTE ALTA DE CIMA 65 KM CHACARA 3")
+
+    assert ("KM", "65") in {(item.type, item.value) for item in parsed.components}
+
+    assert ("NUMERO", "65") not in {(item.type, item.value) for item in parsed.components}
+
+
+def test_postfix_km_does_not_override_prefix_km(parser):
+    parsed = parser.parse_query("RODOVIA DF 001 KM 13 CHACARA 26 TAGUATINGA")
+
+    assert ("KM", "13") in {(component.type, component.value) for component in parsed.components}
+
+    assert ("KM", "1") not in {(component.type, component.value) for component in parsed.components}
