@@ -91,10 +91,12 @@ def test_ranker_produces_structured_assessment(
         breakdown.text_similarity * ranking_policy.features.text_similarity
         + breakdown.token_coverage * ranking_policy.features.token_coverage
         + item.retrieval_score * ranking_policy.features.retrieval_score
+        + breakdown.components * ranking_policy.features.components
     ) / (
         ranking_policy.features.text_similarity
         + ranking_policy.features.token_coverage
         + ranking_policy.features.retrieval_score
+        + ranking_policy.features.components
     )
 
     assert match.assessment.score == pytest.approx(expected_score)
@@ -106,10 +108,24 @@ def test_ranker_produces_structured_assessment(
     assert breakdown.locality == 0.0
     assert breakdown.road == 0.0
     assert breakdown.sector == 0.0
-    assert breakdown.components == 0.0
+    assert breakdown.components == pytest.approx(1.0)
     assert breakdown.conflict_penalty == 0.0
+
     assert match.assessment.matched_target == "address"
-    assert match.assessment.component_evidence == ()
+
+    assert {
+        (
+            evidence.type,
+            evidence.requested_value,
+            evidence.status,
+        )
+        for evidence in match.assessment.component_evidence
+    } >= {
+        ("GRID", "QI 15", "exact"),
+        ("CONJUNTO", "2", "exact"),
+        ("CASA", "1", "exact"),
+    }
+
     assert match.assessment.missing == ()
     assert match.assessment.conflicts == ()
     assert match.assessment.retrieval_strategies == ("address_trigram",)
@@ -288,3 +304,52 @@ def test_text_similarity_can_match_establishment(
 
     assert match.assessment.matched_target == ("establishment")
     assert match.assessment.breakdown.text_similarity == pytest.approx(1.0)
+
+
+def test_component_score_uses_typed_structural_weights(
+    parser,
+    vocabulary,
+    ranking_policy,
+):
+    query = parser.parse_query("QUADRA 10 LOTE 2")
+
+    item = candidate(
+        row_id=1,
+        lograd_num="EDF LOTE 2, SN",
+        complemento="",
+        cep="70000000",
+        locality="AGUAS CLARAS",
+    )
+
+    parsed_candidate = parser.parse_record(
+        lograd_num=item.address.lograd_num,
+        complemento=item.address.complemento,
+        locality=item.address.locality,
+        establishment=item.address.establishment,
+        cep=item.address.cep,
+    )
+
+    match = ranker(
+        parser,
+        vocabulary,
+        ranking_policy,
+    ).rank(
+        query,
+        parsed_candidate,
+        item,
+    )
+
+    quadra_weight = vocabulary.components["QUADRA"].weight
+    lote_weight = vocabulary.components["LOTE"].weight
+
+    expected_component_score = lote_weight / (quadra_weight + lote_weight)
+
+    assert match.assessment.breakdown.components == pytest.approx(expected_component_score)
+
+    evidence = {item.type: item for item in match.assessment.component_evidence}
+
+    assert evidence["QUADRA"].status == "missing"
+    assert evidence["LOTE"].status == "exact"
+
+    assert match.assessment.missing == ("QUADRA 10",)
+    assert match.assessment.conflicts == ()
