@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from app.domain.models import (
     Address,
     AddressCandidate,
@@ -83,8 +85,29 @@ def test_ranker_produces_structured_assessment(
     )
 
     assert match.address == item.address
-    assert match.assessment.score == 0.0
-    assert match.assessment.classification == "weak_candidate"
+    breakdown = match.assessment.breakdown
+
+    expected_score = (
+        breakdown.text_similarity * ranking_policy.features.text_similarity
+        + breakdown.token_coverage * ranking_policy.features.token_coverage
+        + item.retrieval_score * ranking_policy.features.retrieval_score
+    ) / (
+        ranking_policy.features.text_similarity
+        + ranking_policy.features.token_coverage
+        + ranking_policy.features.retrieval_score
+    )
+
+    assert match.assessment.score == pytest.approx(expected_score)
+    assert 0.0 < match.assessment.score <= 1.0
+
+    assert breakdown.text_similarity > 0.0
+    assert breakdown.token_coverage > 0.0
+
+    assert breakdown.locality == 0.0
+    assert breakdown.road == 0.0
+    assert breakdown.sector == 0.0
+    assert breakdown.components == 0.0
+    assert breakdown.conflict_penalty == 0.0
     assert match.assessment.matched_target == "address"
     assert match.assessment.component_evidence == ()
     assert match.assessment.missing == ()
@@ -126,7 +149,142 @@ def test_rank_all_returns_one_assessment_per_candidate(
     )
 
     assert [match.address.row_id for match in ranked] == [
-        1,
         2,
+        1,
     ]
-    assert all(match.assessment.classification == "weak_candidate" for match in ranked)
+
+    assert ranked[0].assessment.score > ranked[1].assessment.score
+
+
+def test_token_coverage_is_reported_in_breakdown(
+    parser,
+    vocabulary,
+    ranking_policy,
+):
+    query = parser.parse_query("RUA 4 QUADRA 10 CASA 2")
+    item = candidate(
+        row_id=1,
+        lograd_num="EDF RUA 4 QUADRA 10, SN",
+        complemento="CASA 2",
+        cep="70000000",
+        locality="AGUAS CLARAS",
+    )
+
+    parsed_candidate = parser.parse_record(
+        lograd_num=item.address.lograd_num,
+        complemento=item.address.complemento,
+        locality=item.address.locality,
+        establishment=item.address.establishment,
+        cep=item.address.cep,
+    )
+
+    match = ranker(
+        parser,
+        vocabulary,
+        ranking_policy,
+    ).rank(
+        query,
+        parsed_candidate,
+        item,
+    )
+
+    assert 0.0 < match.assessment.breakdown.token_coverage <= 1.0
+
+
+def test_retrieval_strength_contributes_to_score(
+    parser,
+    vocabulary,
+    ranking_policy,
+):
+    query = parser.parse_query("RUA 4 QUADRA 10 CASA 2")
+
+    weak_retrieval = candidate(
+        row_id=1,
+        lograd_num="EDF RUA 4 QUADRA 10, SN",
+        complemento="CASA 2",
+        cep="70000000",
+        locality="AGUAS CLARAS",
+        retrieval_score=0.2,
+    )
+    strong_retrieval = candidate(
+        row_id=1,
+        lograd_num="EDF RUA 4 QUADRA 10, SN",
+        complemento="CASA 2",
+        cep="70000000",
+        locality="AGUAS CLARAS",
+        retrieval_score=0.9,
+    )
+
+    parsed_candidate = parser.parse_record(
+        lograd_num=strong_retrieval.address.lograd_num,
+        complemento=strong_retrieval.address.complemento,
+        locality=strong_retrieval.address.locality,
+        establishment=(strong_retrieval.address.establishment),
+        cep=strong_retrieval.address.cep,
+    )
+
+    ranker_instance = ranker(
+        parser,
+        vocabulary,
+        ranking_policy,
+    )
+
+    weak_match = ranker_instance.rank(
+        query,
+        parsed_candidate,
+        weak_retrieval,
+    )
+    strong_match = ranker_instance.rank(
+        query,
+        parsed_candidate,
+        strong_retrieval,
+    )
+
+    assert strong_match.assessment.score > weak_match.assessment.score
+
+
+def test_text_similarity_can_match_establishment(
+    parser,
+    vocabulary,
+    ranking_policy,
+):
+    query = parser.parse_query("ESCOLA CLASSE GIRASSOL")
+
+    item = AddressCandidate(
+        address=Address(
+            row_id=1,
+            public_id="1",
+            lograd_num="EDF QUADRA 10, SN",
+            complemento=None,
+            cep="70000000",
+            locality="AGUAS CLARAS",
+            establishment="ESCOLA CLASSE GIRASSOL",
+            coordinates=Coordinates(
+                -47.8,
+                -15.8,
+            ),
+        ),
+        retrieval_score=0.9,
+        retrieval_strategies=("establishment_trigram",),
+    )
+
+    parsed_candidate = parser.parse_record(
+        lograd_num=item.address.lograd_num,
+        complemento=item.address.complemento,
+        locality=item.address.locality,
+        establishment=item.address.establishment,
+        cep=item.address.cep,
+    )
+
+    match = ranker(
+        parser,
+        vocabulary,
+        ranking_policy,
+    ).rank(
+        query,
+        parsed_candidate,
+        item,
+    )
+
+    assert match.assessment.matched_target == ("establishment")
+    assert match.assessment.breakdown.text_similarity == pytest.approx(1.0)

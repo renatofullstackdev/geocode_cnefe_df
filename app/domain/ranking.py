@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from rapidfuzz import fuzz
+
 from .addressing import ParsedAddress
 from .models import (
     AddressCandidate,
@@ -69,17 +71,47 @@ class Ranker:
         *,
         cep_relaxed: bool = False,
     ) -> RankedMatch:
-        score = 0.0
+        address_similarity = _ratio(
+            query.normalized,
+            parsed_candidate.normalized,
+        )
+        establishment_similarity = _ratio(
+            query.normalized,
+            parsed_candidate.establishment,
+        )
+
+        if establishment_similarity > address_similarity:
+            text_similarity = establishment_similarity
+            matched_target = "establishment"
+        else:
+            text_similarity = address_similarity
+            matched_target = "address"
+
+        token_coverage = _token_coverage(
+            query.retrieval_tokens,
+            parsed_candidate.normalized,
+        )
+
+        retrieval_score = min(
+            max(float(candidate.retrieval_score), 0.0),
+            1.0,
+        )
+
+        score = self._weighted_score(
+            text_similarity=text_similarity,
+            token_coverage=token_coverage,
+            retrieval_score=retrieval_score,
+        )
 
         return RankedMatch(
             address=candidate.address,
             assessment=MatchAssessment(
                 score=score,
                 classification=self._classification(score),
-                matched_target="address",
+                matched_target=matched_target,
                 breakdown=ScoreBreakdown(
-                    text_similarity=0.0,
-                    token_coverage=0.0,
+                    text_similarity=text_similarity,
+                    token_coverage=token_coverage,
                     locality=0.0,
                     road=0.0,
                     sector=0.0,
@@ -93,9 +125,59 @@ class Ranker:
             ),
         )
 
+    def _weighted_score(
+        self,
+        *,
+        text_similarity: float,
+        token_coverage: float,
+        retrieval_score: float,
+    ) -> float:
+        weights = self.policy.features
+
+        features = (
+            (
+                text_similarity,
+                weights.text_similarity,
+            ),
+            (
+                token_coverage,
+                weights.token_coverage,
+            ),
+            (
+                retrieval_score,
+                weights.retrieval_score,
+            ),
+        )
+
+        denominator = sum(weight for _, weight in features)
+
+        return sum(value * weight for value, weight in features) / denominator
+
     def _classification(self, score: float) -> str:
         if score >= self.policy.thresholds.strong_candidate:
             return "strong_candidate"
         if score >= self.policy.thresholds.candidate:
             return "candidate"
         return "weak_candidate"
+
+
+def _ratio(
+    left: str | None,
+    right: str | None,
+) -> float:
+    if not left or not right:
+        return 0.0
+
+    return fuzz.WRatio(left, right) / 100.0
+
+
+def _token_coverage(
+    query_tokens: tuple[str, ...],
+    candidate_text: str,
+) -> float:
+    if not query_tokens:
+        return 0.0
+
+    candidate_tokens = set(candidate_text.split())
+
+    return sum(token in candidate_tokens for token in query_tokens) / len(query_tokens)
