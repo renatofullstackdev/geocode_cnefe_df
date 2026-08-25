@@ -4,12 +4,18 @@ import pytest
 
 from app.domain.locality import LocalityIndex
 from app.domain.parser import AddressParser
+from app.domain.ranking_policy import load_ranking_policy
 from app.domain.vocabulary import load_vocabulary
 
 
 @pytest.fixture(scope="session")
 def vocabulary():
     return load_vocabulary()
+
+
+@pytest.fixture(scope="session")
+def ranking_policy():
+    return load_ranking_policy()
 
 
 @pytest.fixture(scope="session")
